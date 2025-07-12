@@ -495,32 +495,25 @@ class Board:
             x, y = piece.pos
 
             if 0 <= x < 8 and 0 <= y < 8:
-                self.board[x][y] = piece.symbol + " "
+                self.board[x][y] = piece.symbol
+
+    def format_piece(self, piece):
+        return piece.center(3)
 
     def print_board(self):        
         # This is for colab, use self.clear() for terminal
         # clear_output(wait=True)
-        # self.clear()
+        self.clear()
+
+        # Assign each piece to the board
+        for piece in self.pieces:
+            x, y = piece.pos
+
+            if 0 <= x < 8 and 0 <= y < 8:
+                self.board[x][y] = piece.symbol
 
         for row in self.board:
-            print(' '.join(row))
-
-    def check_piece(self, piece: Piece):
-        self.clear_board()
-        x, y = piece.pos
-
-        self.board[x][y] = "\033[31m" + piece.symbol + " \033[0m"
-        av_moves = piece.calculate_moves(self)
-
-        for mv in av_moves:
-            x, y = mv
-
-            self.board[x][y] = "\033[31m" + '\u2022 ' + "\033[0m"
-
-        # TODO: remove printing the board each time you check for available moves
-        self.print_board()
-
-        return av_moves
+            print(''.join(self.format_piece(piece) for piece in row))
 
     def get_pieces_for_player(self, player: AnyStr):
         return [piece for piece in self.pieces if piece.color == player]
@@ -530,7 +523,6 @@ class Board:
         x, y = pos
 
         self.board[x][y] = symb + " "
-        self.print_board()
 
     def clear_board(self):
         self.board = [['\u2022 ' for _ in range(8)] for _ in range(8)]
@@ -539,7 +531,7 @@ class Board:
             x, y = piece.pos
 
             if 0 <= x < 8 and 0 <= y < 8:
-                self.board[x][y] = piece.symbol + " "
+                self.board[x][y] = piece.symbol
 
     def clear(self):
         os.system('cls' if os.name == 'nt' else 'clear')
@@ -552,3 +544,14 @@ if __name__ == "__main__":
     white_pieces = board.get_pieces_for_player('w')
     black_pieces = board.get_pieces_for_player('b')
 
+    for piece in board.pieces:
+        available_moves = piece.calculate_moves(board)
+        for move in available_moves:
+            x, y = piece.pos
+            print(x, y)
+            board.board[x][y] = "\u2022"
+            board.apply_move(move, piece.symbol)
+            piece.pos = move
+
+            board.print_board()
+            time.sleep(0.5)
